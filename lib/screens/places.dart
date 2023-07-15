@@ -1,21 +1,15 @@
-import 'package:favorite_places/models/place.dart';
+import 'package:favorite_places/providers/places_provider.dart';
 import 'package:favorite_places/screens/add_place.dart';
+import 'package:favorite_places/screens/place_details.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PlacesScreen extends StatefulWidget {
+class PlacesScreen extends ConsumerWidget {
   const PlacesScreen({
     super.key,
-    required this.places,
   });
 
-  final List<Place> places;
-
-  @override
-  State<PlacesScreen> createState() => _PlacesScreenState();
-}
-
-class _PlacesScreenState extends State<PlacesScreen> {
-  void _addPlace() {
+  void _addPlace(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) => const AddPlaceScreen(),
@@ -24,15 +18,26 @@ class _PlacesScreenState extends State<PlacesScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final places = ref.watch(placesProvider);
+
     Widget content = const Center(child: Text('No places added yet'));
 
-    if (widget.places.isNotEmpty) {
+    if (places.isNotEmpty) {
       content = ListView.builder(
-        itemCount: widget.places.length,
+        itemCount: places.length,
         itemBuilder: (ctx, index) => ListTile(
-          title: Text(widget.places[index].title),
-          onTap: ,
+          title: Text(places[index].title),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (ctx) =>
+                    PlaceDetailsScreen(
+                      place: places[index],
+                    ),
+              ),
+            );
+          },
         ),
       );
     }
@@ -42,7 +47,9 @@ class _PlacesScreenState extends State<PlacesScreen> {
         title: const Text('Your Places'),
         actions: [
           IconButton(
-            onPressed: _addPlace,
+            onPressed: () {
+              _addPlace(context);
+            },
             icon: const Icon(Icons.add),
           ),
         ],
